@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type = "text/javascript" src = "js/display.js"></script>
+	<script type = "text/javascript" src = "js/keyboard.js"></script>
+	<script type = "text/javascript" src = "js/CHIP8.js"></script>
+	<script id = "shader-fs" type = "x-shader/x-fragment">
+		precision mediump float;
+		
+		varying vec4 vColor;
+
+		void main (void) {
+			gl_FragColor = vColor;
+		}
+	</script>
+	<script id = "shader-vs" type = "x-shader/x-vertex">
+		attribute vec3 vertexPositions;
+		uniform vec4 colorVector;
+
+		varying vec4 vColor;
+
+		void main (void) {
+			gl_Position = vec4(vertexPositions, 1.0);
+			vColor = colorVector;
+		}
+	</script>
+	<title>CHIP 8</title>
+</head>
+<body onload="bootInterpreter();" style="background-color: #333;">
+	<canvas id = "Display" style = "position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;"></canvas>
+</body>
+</html>
