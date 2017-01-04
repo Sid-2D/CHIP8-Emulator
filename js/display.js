@@ -167,7 +167,7 @@ function colorPixel (posX, posY) {
 	if (posY > 63) {
 		posY %= 63;
 	}
-	console.log("posx = " + posX + ", posy = " + posY);
+	// console.log("posx = " + posX + ", posy = " + posY);
 	if (display[posX][posY]) {
 		display[posX][posY] = 0;
 		return true;
