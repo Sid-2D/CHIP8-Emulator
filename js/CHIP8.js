@@ -42,7 +42,14 @@ var debugCounter = 0;	// Global, used as a breakpoint
 function startInterpreterCycles () {
 	if (!stop) {
 		requestAnimationFrame(startInterpreterCycles);
-		update();
+		for (var i = 0; i < 10; i++) {
+			//update();
+			if (CHIP8.delayTimer) CHIP8.delayTimer--;
+			if (CHIP8.soundTimer) CHIP8.soundTimer--;
+			processOpcode();
+			drawScene();
+		}
+		
 	}	
 }
 
@@ -68,9 +75,9 @@ function processOpcode () {
 	// if (debugCounter == 29) {
 	// 	debugger;
 	// } 
-	console.log("pc = " + CHIP8.pc);
+	//console.log("pc = " + CHIP8.pc);
 	var opCode = CHIP8.memory[CHIP8.pc] << 8 | CHIP8.memory[CHIP8.pc + 1];
-	opCodeInHex = opCode.toString(16);
+	//opCodeInHex = opCode.toString(16);
 	var x = (opCode & 0x0f00) >> 8;
 	var y = (opCode & 0x00f0) >> 4;
 	CHIP8.pc += 2;
@@ -78,7 +85,7 @@ function processOpcode () {
 		stop = true;
 		return;
 	}
-	console.log("opCode = " + opCode.toString(16));
+	//console.log("opCode = " + opCode.toString(16));
 	switch (opCode & 0xf000) {
 		case 0x0000 : {
 			switch (opCode) {
@@ -103,12 +110,12 @@ function processOpcode () {
 			CHIP8.pc = opCode & 0x0fff;
 		} break;
 		case 0x3000 : {
-			if (CHIP8.v[x] == Number(opCode & 0x00ff)) {
+			if (CHIP8.v[x] === (opCode & 0x00ff)) {
 				CHIP8.pc += 2;
 			}
 		} break;
 		case 0x4000 : {
-			if (CHIP8.v[x] != Number(opCode & 0x00ff)) {
+			if (CHIP8.v[x] != (opCode & 0x00ff)) {
 				CHIP8.pc += 2;
 			}
 		} break;
@@ -122,6 +129,7 @@ function processOpcode () {
 		} break;
 		case 0x7000 : {
 			CHIP8.v[x] += opCode & 0x00ff;
+			CHIP8.v[x] &= 0x00ff; 
 		} break;
 		case 0x8000 : {
 			switch (opCode & 0x000f) {
@@ -139,23 +147,25 @@ function processOpcode () {
 				} break;
 				case 0x0004 : {
 					CHIP8.v[x] = (CHIP8.v[x] + CHIP8.v[y]) & 0x00ff;	// Keep the last 8 bits of the answer.
-					CHIP8.v[0x000f] = ((CHIP8.v[x] + CHIP8.v[y]) & 0x0f00) >> 8; // Keep the 9th bit of the answer.
+					CHIP8.v[0x000f] = ((CHIP8.v[x] + CHIP8.v[y]) & (1 << 8)) >> 8; // Keep the 9th bit of the answer.
 				} break;
 				case 0x0005 : {
-					CHIP8.v[x] = (CHIP8.v[x] > CHIP8.v[y]) ? (CHIP8.v[x] - CHIP8.v[y]) : (CHIP8.v[y] - CHIP8.v[x]);
 					CHIP8.v[0x000f] = (CHIP8.v[x] > CHIP8.v[y]) ? 1 : 0;
+					CHIP8.v[x] = CHIP8.v[x] - CHIP8.v[y];
+					if (CHIP8.v[x] < 0) {
+						CHIP8.v[x] += 0xff;
+					}
 				} break;
 				case 0x0006 : {
-					if (CHIP8.v[x] & 1) {
-						CHIP8.v[0x000f] = 1;
-					} else {
-						CHIP8.v[0x000f] = 0;
-					}
-					CHIP8.v[x] = CHIP8.v[x] >> 2;
+					CHIP8.v[0xf] = CHIP8.v[x] & 1;
+					CHIP8.v[x] = CHIP8.v[x] >> 1;
 				} break;
 				case 0x0007 : {
-					CHIP8.v[x] = (CHIP8.v[y] > CHIP8.v[x]) ? (CHIP8.v[y] - CHIP8.v[x]) : (CHIP8.v[x] - CHIP8.v[y]);
 					CHIP8.v[0x000f] = (CHIP8.v[y] > CHIP8.v[x]) ? 1 : 0;
+					CHIP8.v[x] = CHIP8.v[y] - CHIP8.v[x];
+					if (CHIP8.v[x] < 0) {
+						CHIP8.v[x] += 0xff;
+					}
 				} break;
 				case 0x000e : {
 					if (CHIP8.v[x] & (1 << 7)) {
@@ -163,7 +173,7 @@ function processOpcode () {
 					} else {
 						CHIP8.v[0x000f] = 0;
 					}
-					CHIP8.v[x] = (CHIP8.v[x] >> 1);
+					CHIP8.v[x] = (CHIP8.v[x] << 1);
 				} break;
 				default : {
 					stop = true;
@@ -230,7 +240,7 @@ function processOpcode () {
 					var temp = CHIP8.v[x];
 					for (var i = 2; i >= 0; i--) {
 						CHIP8.memory[CHIP8.i + i] = parseInt(temp % 10);
-						temp = parseInt(temp / 10);
+						temp = temp / 10;
 					} 
 				} break;
 				case 0x0055 : {
