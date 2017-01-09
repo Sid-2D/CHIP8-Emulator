@@ -1,6 +1,6 @@
 #Description
 ---------------
-This is my implementaion of CHIP8 Interpreter in Javascript using WebGL. Currently it is in beta and doesn't support sound. Pong2 runs fine although the execution is a bit slow. I'll be testing it for potential speed enhancements and support for more games.  
+This is my implementaion of CHIP8 Interpreter in Javascript using WebGL. Currently it is in beta and doesn't support sound. Pong2 runs fine at full speed. I'll be testing it for potential speed enhancements and support for more games.  
   
 Also, this is my first Emulation project so it may be a bit rough around the edges.  
   
