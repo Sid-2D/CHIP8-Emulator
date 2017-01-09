@@ -26,12 +26,12 @@ function loadProgram () {
 	xhr.open("GET", "Games/PONG2", true);
 	xhr.responseType = "arraybuffer";
 	xhr.onload = function () {
-		console.log(xhr.response);
 		program = new Uint8Array(xhr.response);
 		for (var i = 0; i < program.length; i++) {
 			CHIP8.memory[i + 0x200] = program[i];
 		}
 		// Once the program is done loading into memory, we start the Interpreter's cycles
+		lastTime = new Date().getTime();
 		startInterpreterCycles();	
 	};
 	xhr.send();
@@ -39,33 +39,31 @@ function loadProgram () {
 
 var stop = false;	// Global, set true at anytime to stop emulation
 var debugCounter = 0;	// Global, used as a breakpoint
+var elapsedTime = 0;
+var frameCount = 0;
+var lastTime = 0;
+var drawCalls = 0;
+var Seconds = 0;
 function startInterpreterCycles () {
 	if (!stop) {
-		requestAnimationFrame(startInterpreterCycles);
 		for (var i = 0; i < 10; i++) {
-			//update();
 			if (CHIP8.delayTimer) CHIP8.delayTimer--;
 			if (CHIP8.soundTimer) CHIP8.soundTimer--;
 			processOpcode();
 			drawScene();
 		}
-		
+		// drawCalls
+		var now = new Date().getTime();
+		elapsedTime = Number(now - lastTime);
+		drawCalls++;
+	    if (elapsedTime >= 1000) {
+	    	document.getElementById('DrawCalls').innerHTML = "Draw Calls: " + drawCalls;
+	    	document.getElementById('Seconds').innerHTML = "Seconds: " + Seconds++;
+	    	drawCalls = 0;
+	    	lastTime = now;
+	    }
+		requestAnimationFrame(startInterpreterCycles);
 	}	
-}
-
-var lastTime = 0;
-function update () {
-	var timeNow = new Date().getTime();
-	var elapsed = timeNow - lastTime;
-	// This decides the fps
-	if (elapsed >= 100/60) {
-		debugCounter++;
-		if (CHIP8.delayTimer) CHIP8.delayTimer--;
-		if (CHIP8.soundTimer) CHIP8.soundTimer--;
-		processOpcode();
-		drawScene();
-		lastTime = timeNow;
-	}
 }
 
 var opCodeInHex;
