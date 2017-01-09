@@ -4,29 +4,31 @@
 	<script type = "text/javascript" src = "js/display.js"></script>
 	<script type = "text/javascript" src = "js/keyboard.js"></script>
 	<script type = "text/javascript" src = "js/CHIP8.js"></script>
-	<script id = "shader-fs" type = "x-shader/x-fragment">
-		precision mediump float;
-		
+	<script id = "vertex" type = "vertex">
+		attribute vec2 vertexPositions;
+		attribute vec2 vertexColors;
+
 		varying vec4 vColor;
 
-		void main (void) {
-			gl_FragColor = vColor;
+		void main () {
+			gl_Position = vec4(vertexPositions, 0.0, 1.0);
+			vColor = vec4(0.0, vertexColors, 1.0);
 		}
 	</script>
-	<script id = "shader-vs" type = "x-shader/x-vertex">
-		attribute vec3 vertexPositions;
-		uniform vec4 colorVector;
+	<script id = "fragment" type = "fragment">
+		precision mediump float;
 
 		varying vec4 vColor;
 
-		void main (void) {
-			gl_Position = vec4(vertexPositions, 1.0);
-			vColor = colorVector;
+		void main () {
+			gl_FragColor = vColor;
 		}
 	</script>
 	<title>CHIP 8</title>
 </head>
 <body onload="bootInterpreter();" style="background-color: #333;">
+	<p id = "DrawCalls" style="color: #fff; font-size: 30px"></p>
+	<p id = "Seconds" style="color: #fff; font-size: 30px"></p>
 	<canvas id = "Display" style = "position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;"></canvas>
 </body>
 </html>
